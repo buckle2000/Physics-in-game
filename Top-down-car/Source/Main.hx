@@ -180,7 +180,8 @@ class Wheel {
 	}
 	
 	public function update() {
+		// slide the velocity with the forward direction
 		var direction_normalized = Vec2.fromPolar(1, body.rotation - Math.PI / 2);
-		body.velocity = direction_normalized.mul(body.velocity.dot(direction_normalized));
+		body.velocity = direction_normalized.mul(body.velocity.dot(direction_normalized)); // this equation is written in the report
 	}
 }
