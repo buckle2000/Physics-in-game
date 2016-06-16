@@ -1,5 +1,6 @@
 package;
 
+import flash.display.Shape;
 import nape.constraint.AngleJoint;
 import nape.constraint.PivotJoint;
 import nape.constraint.WeldJoint;
@@ -53,11 +54,8 @@ class Main extends Sprite {
 		if (e != null) removeEventListener(Event.ADDED_TO_STAGE, initialise);
 		
 		// debug bitmap, for debug purpose
-		#if flash
 		debugdraw = new BitmapDebug(stage.stageWidth, stage.stageHeight);
-		#else
-		debugdraw = new ShapeDebug(stage.stageWidth, stage.stageHeight, 0x666666);
-		#end
+		// debugdraw = new ShapeDebug(stage.stageWidth, stage.stageHeight);
 		debugdraw.transform = Mat23.translation(stage.stageWidth / 2, stage.stageHeight / 2);
 		
 		text = new TextField();
@@ -65,10 +63,10 @@ class Main extends Sprite {
 		text.text = "Use WASD or arrow keys to control, R to reset";
 		text.autoSize = LEFT;
 		
-		setup();
-		
 		addChild(debugdraw.display);
 		addChild(text);
+		
+		setup();
 		
 		stage.addEventListener(Event.ENTER_FRAME, enterframe);
 		stage.addEventListener(KeyboardEvent.KEY_DOWN, keydown);
@@ -126,9 +124,9 @@ class Main extends Sprite {
 		fr.update();
 		rl.update();
 		rr.update();
+		car_body.velocity.muleq(0.99); // stop the car from getting too fast
 		
 		space.step(1 / stage.frameRate);
-		car_body.velocity.muleq(0.99); // stop the car from getting too fast
 		debugdraw.clear();
 		debugdraw.draw(space);
 		debugdraw.flush();
