@@ -72,12 +72,12 @@ class Main extends Sprite {
 		car_body = create_body(); // car body
 		
 		// constrain both front wheel
-		pin(fl.body, car_body, Vec2.weak(-18, -25));
-		pin(fr.body, car_body, Vec2.weak( 18, -25));
+		pin(fl.m_body, car_body, Vec2.weak(-18, -25));
+		pin(fr.m_body, car_body, Vec2.weak( 18, -25));
 		
 		// stable both rear wheels to the car
-		weld(rl.body, car_body, Vec2.weak(-18, 25));
-		weld(rr.body, car_body, Vec2.weak( 18, 25));
+		weld(rl.m_body, car_body, Vec2.weak(-18, 25));
+		weld(rr.m_body, car_body, Vec2.weak( 18, 25));
 	}
 	
 	// reset rotation to 0
@@ -99,12 +99,12 @@ class Main extends Sprite {
 			update_turn(0);
 		}
 		if (keys[Keyboard.W] || keys[Keyboard.UP]) {
-			rl.body.applyImpulse(Vec2.fromPolar(10, rl.body.rotation-Math.PI/2));
-			rr.body.applyImpulse(Vec2.fromPolar(10, rr.body.rotation-Math.PI/2));
+			rl.m_body.applyImpulse(Vec2.fromPolar(10, rl.m_body.rotation-Math.PI/2));
+			rr.m_body.applyImpulse(Vec2.fromPolar(10, rr.m_body.rotation-Math.PI/2));
 		}
 		if (keys[Keyboard.S] || keys[Keyboard.DOWN]) {
-			rl.body.applyImpulse(Vec2.fromPolar(10, rl.body.rotation+Math.PI/2));
-			rr.body.applyImpulse(Vec2.fromPolar(10, rr.body.rotation+Math.PI/2));
+			rl.m_body.applyImpulse(Vec2.fromPolar(10, rl.m_body.rotation+Math.PI/2));
+			rr.m_body.applyImpulse(Vec2.fromPolar(10, rr.m_body.rotation+Math.PI/2));
 		}
 		
 		fl.update();
@@ -123,8 +123,8 @@ class Main extends Sprite {
 	}
 	
 	function update_turn(turn:Float) {
-		update_turn_single(turn, fl.body);
-		update_turn_single(turn, fr.body);
+		update_turn_single(turn, fl.m_body);
+		update_turn_single(turn, fr.m_body);
 	}
 	
 	function update_turn_single(turn:Float, wheel:Body) {
@@ -143,7 +143,7 @@ class Main extends Sprite {
 	
 	function create_wheel():Wheel {
 		var wheel = new Wheel(space);
-		wheel.body.group = car;
+		wheel.m_body.group = car;
 		return wheel;
 	}
 	
@@ -162,6 +162,7 @@ class Main extends Sprite {
 	}
 	
 	function pin(wheel:Body, car_body:Body, pos:Vec2) {
+		// there is no such revolute joint like in Box2D, using 2 joints combined instead
 		var pjoint = new PivotJoint(wheel, car_body, Vec2.weak(0, 0), pos);
 		pjoint.space = space;
 		var ajoint = new AngleJoint(wheel, car_body, -ANGLE_OFFSET, ANGLE_OFFSET);
@@ -170,18 +171,19 @@ class Main extends Sprite {
 }
 
 class Wheel {
-	public var body:Body;
+	public var m_body:Body;
 	
 	public function new(space:Space) {
-		body = new Body(BodyType.DYNAMIC);
-		body.space = space;
+		// a wheel should be dynamic
+		m_body = new Body(BodyType.DYNAMIC);
+		m_body.space = space;
 		var shape = new Polygon(Polygon.box(10, 20));
-		shape.body = body;
+		shape.body = m_body;
 	}
 	
 	public function update() {
 		// slide the velocity with the forward direction
-		var direction_normalized = Vec2.fromPolar(1, body.rotation - Math.PI / 2);
-		body.velocity = direction_normalized.mul(body.velocity.dot(direction_normalized)); // this equation is written in the report
+		var direction_normalized = Vec2.fromPolar(1, m_body.rotation - Math.PI / 2);
+		m_body.velocity = direction_normalized.mul(m_body.velocity.dot(direction_normalized)); // this equation is written in the report
 	}
 }
