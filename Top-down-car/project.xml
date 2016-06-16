@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
 	
-	<meta title="TopDownCar" package="com.sample.topdowncar" version="1.0.0" company="Company Name" />
+	<meta title="TopDownCar" version="1.0.0" company="buckle2000" />
 	<app main="Main" path="Export" file="TopDownCar" />
 	
 	<source path="Source" />
 	
 	<haxelib name="openfl" />
 	<haxelib name="nape" />
-	
-	<assets path="Assets" rename="assets" />
 	
 </project>
