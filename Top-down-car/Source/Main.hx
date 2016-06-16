@@ -121,13 +121,14 @@ class Main extends Sprite {
 			rr.m_body.applyImpulse(Vec2.fromPolar(10, rr.m_body.rotation+Math.PI/2));
 		}
 		
+		// cancel lateral velocities
 		fl.update();
 		fr.update();
 		rl.update();
 		rr.update();
-		car_body.velocity.muleq(0.99); // stop the car from getting too fast
 		
 		space.step(1 / stage.frameRate);
+		car_body.velocity.muleq(0.99); // stop the car from getting too fast
 		debugdraw.clear();
 		debugdraw.draw(space);
 		debugdraw.flush();
