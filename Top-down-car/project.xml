@@ -9,4 +9,5 @@
 	<haxelib name="openfl" />
 	<haxelib name="nape" />
 	
+	<assets path="Assets" />
 </project>

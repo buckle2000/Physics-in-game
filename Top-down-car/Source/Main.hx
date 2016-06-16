@@ -1,7 +1,6 @@
 package;
 
 import nape.constraint.AngleJoint;
-import nape.constraint.DistanceJoint;
 import nape.constraint.PivotJoint;
 import nape.constraint.WeldJoint;
 import nape.dynamics.InteractionGroup;
@@ -9,17 +8,23 @@ import nape.geom.Mat23;
 import nape.geom.Vec2;
 import nape.phys.Body;
 import nape.phys.BodyType;
+import nape.phys.Material;
 import nape.shape.Polygon;
 import nape.space.Space;
 import nape.util.BitmapDebug;
 import nape.util.Debug;
 import nape.util.ShapeDebug;
+import openfl.Assets;
 import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.events.KeyboardEvent;
+import openfl.text.TextField;
+import openfl.text.TextFieldAutoSize;
+import openfl.text.TextFormat;
 import openfl.ui.Keyboard;
 
 class Main extends Sprite {
+	var text:TextField;
 	var debugdraw:Debug;
 	var space:Space;
 	var car:InteractionGroup;
@@ -29,8 +34,9 @@ class Main extends Sprite {
 	var rr:Wheel;
 	var car_body:Body;
 	
-	var keys = new Array<Bool>(); // key helper
+	var keys:Array<Bool>; // key helper
 	
+	var LINEAR_DRAG:Float = 10.0;
 	var ANGLE_OFFSET = Math.PI / 6;
 	static inline var ROTATE_LIMIT = 0.1;
 	
@@ -46,6 +52,7 @@ class Main extends Sprite {
 	function initialise(e:Event) {
 		if (e != null) removeEventListener(Event.ADDED_TO_STAGE, initialise);
 		
+		// debug bitmap, for debug purpose
 		#if flash
 		debugdraw = new BitmapDebug(stage.stageWidth, stage.stageHeight);
 		#else
@@ -53,15 +60,23 @@ class Main extends Sprite {
 		#end
 		debugdraw.transform = Mat23.translation(stage.stageWidth / 2, stage.stageHeight / 2);
 		
+		text = new TextField();
+		text.defaultTextFormat = new TextFormat(Assets.getFont("Assets/font.ttf").fontName, 16, 0xffffff);
+		text.text = "Use WASD or arrow keys to control, R to reset";
+		text.autoSize = LEFT;
+		
 		setup();
 		
 		addChild(debugdraw.display);
+		addChild(text);
+		
 		stage.addEventListener(Event.ENTER_FRAME, enterframe);
 		stage.addEventListener(KeyboardEvent.KEY_DOWN, keydown);
 		stage.addEventListener(KeyboardEvent.KEY_UP, keyup);
 	}
 	
-	function setup() {		
+	function setup() {	
+		keys = new Array<Bool>();
 		space = new Space(); // setup a physics space
 		car = new InteractionGroup(true); // ignore interactions within the car
 		
@@ -90,7 +105,7 @@ class Main extends Sprite {
 	}
 	
 	// called on each frame
-	function enterframe(e:Event) {
+	function enterframe(e:Event) {		
 		if (keys[Keyboard.A] || keys[Keyboard.LEFT]) {
 			update_turn(ANGLE_OFFSET);
 		} else if (keys[Keyboard.D] || keys[Keyboard.RIGHT]) {
@@ -101,8 +116,7 @@ class Main extends Sprite {
 		if (keys[Keyboard.W] || keys[Keyboard.UP]) {
 			rl.m_body.applyImpulse(Vec2.fromPolar(10, rl.m_body.rotation-Math.PI/2));
 			rr.m_body.applyImpulse(Vec2.fromPolar(10, rr.m_body.rotation-Math.PI/2));
-		}
-		if (keys[Keyboard.S] || keys[Keyboard.DOWN]) {
+		} else if (keys[Keyboard.S] || keys[Keyboard.DOWN]) {
 			rl.m_body.applyImpulse(Vec2.fromPolar(10, rl.m_body.rotation+Math.PI/2));
 			rr.m_body.applyImpulse(Vec2.fromPolar(10, rr.m_body.rotation+Math.PI/2));
 		}
@@ -111,6 +125,7 @@ class Main extends Sprite {
 		fr.update();
 		rl.update();
 		rr.update();
+		car_body.velocity.muleq(0.99); // stop the car from getting too fast
 		
 		space.step(1 / stage.frameRate);
 		debugdraw.clear();
@@ -119,6 +134,7 @@ class Main extends Sprite {
 	}
 	
 	function keydown(e:KeyboardEvent) {
+		if (e.keyCode == Keyboard.R) setup();
 		keys[e.keyCode] = true;
 	}
 	
